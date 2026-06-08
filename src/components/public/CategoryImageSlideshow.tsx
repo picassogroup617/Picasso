@@ -10,8 +10,9 @@ export interface SlideImage {
 
 interface CategoryImageSlideshowProps {
   images: SlideImage[];
-  /** Shown when the category has no product images yet. */
-  fallbackUrl: string;
+  /** Shown when the category has no product images yet. May be null when the
+   * category itself has no hero image — a neutral placeholder is rendered. */
+  fallbackUrl: string | null;
   fallbackAlt: string;
   /** Delay between slides, in ms. Defaults to 2000. */
   intervalMs?: number;
@@ -39,6 +40,13 @@ export function CategoryImageSlideshow({
   }, [images.length, intervalMs]);
 
   if (images.length === 0) {
+    if (!fallbackUrl) {
+      return (
+        <div className="flex h-full items-center justify-center text-xs text-brand-gray-500">
+          No image
+        </div>
+      );
+    }
     return (
       <Image
         src={fallbackUrl}

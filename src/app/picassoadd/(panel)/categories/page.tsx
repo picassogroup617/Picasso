@@ -58,12 +58,18 @@ export default async function CategoriesPage({ searchParams }: CategoriesPagePro
             {categories.map((c) => (
               <tr key={c.id}>
                 <td className="px-5 py-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={c.imageUrl}
-                    alt={c.name}
-                    className="h-10 w-10 rounded-md border border-brand-gray-200 object-cover"
-                  />
+                  {c.imageUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={c.imageUrl}
+                      alt={c.name}
+                      className="h-10 w-10 rounded-md border border-brand-gray-200 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md border border-dashed border-brand-gray-200 text-[10px] text-brand-gray-400">
+                      none
+                    </div>
+                  )}
                 </td>
                 <td className="px-5 py-3 font-medium text-brand-gray-900">{c.name}</td>
                 <td className="px-5 py-3 font-mono text-xs text-brand-gray-600">

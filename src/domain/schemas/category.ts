@@ -27,9 +27,10 @@ export const categorySchema = z.object({
   imageUrl: z
     .string()
     .trim()
-    .min(1, "Image is required")
     .max(2048)
-    .url("Enter a valid image URL"),
+    .url("Enter a valid image URL")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   imagePublicId: optionalString,
   order: z.coerce.number().int().min(0).max(9999).default(0),
   isPublished: z.boolean().default(true),

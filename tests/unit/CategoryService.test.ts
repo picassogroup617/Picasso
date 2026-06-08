@@ -160,6 +160,25 @@ describe("CategoryService.update", () => {
     expect(images.delete).not.toHaveBeenCalled();
   });
 
+  it("persists a null imageUrl when the form is submitted without an image", async () => {
+    const existing = makeCategory({ imagePublicId: null, imageUrl: null });
+    (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(existing);
+    (repo.update as ReturnType<typeof vi.fn>).mockImplementation(async (_id, d) =>
+      makeCategory({ ...existing, ...d }),
+    );
+
+    await service.update(
+      "c1",
+      makeInput({ imageUrl: undefined, imagePublicId: undefined }),
+    );
+
+    expect(repo.update).toHaveBeenCalledWith(
+      "c1",
+      expect.objectContaining({ imageUrl: null, imagePublicId: null }),
+    );
+    expect(images.delete).not.toHaveBeenCalled();
+  });
+
   it("keeps the previous image in Cloudinary when another row still references it", async () => {
     const existing = makeCategory({ imagePublicId: "shared/id" });
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(existing);

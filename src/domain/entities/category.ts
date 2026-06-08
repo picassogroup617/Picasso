@@ -4,7 +4,7 @@ export interface Category {
   slug: string;
   name: string;
   shortDescription: string;
-  imageUrl: string;
+  imageUrl: string | null;
   imagePublicId: string | null;
   order: number;
   isPublished: boolean;

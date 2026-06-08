@@ -4,7 +4,7 @@ export interface CreateCategoryData {
   slug: string;
   name: string;
   shortDescription: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   imagePublicId?: string | null;
   order?: number;
   isPublished?: boolean;
@@ -14,7 +14,7 @@ export interface UpdateCategoryData {
   slug?: string;
   name?: string;
   shortDescription?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   imagePublicId?: string | null;
   order?: number;
   isPublished?: boolean;

@@ -53,7 +53,7 @@ model Category {
   slug             String    @unique
   name             String
   shortDescription String
-  imageUrl         String
+  imageUrl         String?
   imagePublicId    String?
   order            Int       @default(0)
   isPublished      Boolean   @default(true)

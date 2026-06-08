@@ -82,7 +82,7 @@ export function CategoryForm({ mode, action, defaults }: CategoryFormProps) {
       </div>
 
       <div className="space-y-1.5">
-        <Label>Image</Label>
+        <Label>Image (optional)</Label>
         <ImageUploader
           folder="categories"
           urlInputName="imageUrl"

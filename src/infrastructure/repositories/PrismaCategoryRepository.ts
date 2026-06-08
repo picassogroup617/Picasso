@@ -15,7 +15,7 @@ export class PrismaCategoryRepository implements ICategoryRepository {
     slug: string;
     name: string;
     shortDescription: string;
-    imageUrl: string;
+    imageUrl: string | null;
     imagePublicId: string | null;
     order: number;
     isPublished: boolean;
@@ -61,7 +61,7 @@ export class PrismaCategoryRepository implements ICategoryRepository {
         slug: data.slug,
         name: data.name,
         shortDescription: data.shortDescription,
-        imageUrl: data.imageUrl,
+        imageUrl: data.imageUrl ?? null,
         imagePublicId: data.imagePublicId ?? null,
         order: data.order ?? 0,
         isPublished: data.isPublished ?? true,
