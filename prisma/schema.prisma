@@ -1,0 +1,156 @@
+// Prisma schema for Picasso
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url and directUrl are now configured in `prisma.config.ts` (Prisma 7+).
+}
+
+// ---------- Enums ----------
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum SocialPlatform {
+  LINKEDIN
+  INSTAGRAM
+  FACEBOOK
+  WHATSAPP
+}
+
+enum QuoteStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+// ---------- Auth / Users ----------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(VIEWER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([role])
+}
+
+// ---------- Catalog ----------
+
+model Category {
+  id               String    @id @default(cuid())
+  slug             String    @unique
+  name             String
+  shortDescription String
+  imageUrl         String
+  imagePublicId    String?
+  order            Int       @default(0)
+  isPublished      Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  products         Product[]
+
+  @@index([isPublished, order])
+}
+
+model Product {
+  id              String         @id @default(cuid())
+  categoryId      String
+  slug            String         @unique
+  name            String
+  longDescription String
+  order           Int            @default(0)
+  isPublished     Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  category        Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  images          ProductImage[]
+  quotes          Quote[]
+
+  @@index([categoryId, order])
+  @@index([isPublished])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  publicId  String?
+  alt       String?
+  order     Int      @default(0)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, order])
+}
+
+// ---------- Site Content (key/value singletons) ----------
+
+model SiteContent {
+  key           String   @id // e.g. "our_story", "our_vision", "address", "hero_title"
+  title         String
+  description   String
+  imageUrl      String?
+  imagePublicId String?
+  updatedAt     DateTime @updatedAt
+}
+
+// ---------- Contact Persons (point-of-contact people with up to 2 phones) ----------
+
+model ContactPerson {
+  id               String   @id @default(cuid())
+  name             String
+  email            String?
+  phone1           String
+  phone1OnWhatsapp Boolean  @default(false)
+  phone2           String?
+  phone2OnWhatsapp Boolean  @default(false)
+  order            Int      @default(0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([isActive, order])
+}
+
+// ---------- Social Media Links ----------
+
+model SocialLink {
+  id        String         @id @default(cuid())
+  platform  SocialPlatform
+  label     String? // e.g. "Picasso India"
+  url       String // full URL (or wa.me link for WhatsApp)
+  order     Int            @default(0)
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([platform, isActive, order])
+}
+
+// ---------- Quote Requests ----------
+
+model Quote {
+  id        String      @id @default(cuid())
+  name      String
+  phone     String
+  email     String
+  message   String?
+  productId String?
+  status    QuoteStatus @default(NEW)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  product   Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+}
