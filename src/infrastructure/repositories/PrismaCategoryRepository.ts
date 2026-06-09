@@ -55,6 +55,22 @@ export class PrismaCategoryRepository implements ICategoryRepository {
     return row ? this.toEntity(row) : null;
   }
 
+  async existsById(id: string): Promise<boolean> {
+    const row = await this.db.category.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    return row !== null;
+  }
+
+  async findSlugsStartingWith(prefix: string): Promise<string[]> {
+    const rows = await this.db.category.findMany({
+      where: { slug: { startsWith: prefix } },
+      select: { slug: true },
+    });
+    return rows.map((r) => r.slug);
+  }
+
   async create(data: CreateCategoryData): Promise<Category> {
     const row = await this.db.category.create({
       data: {

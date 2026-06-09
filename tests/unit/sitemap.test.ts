@@ -14,6 +14,15 @@ vi.mock("@/lib/container", () => ({
   }),
 }));
 
+// `unstable_cache` would otherwise persist memoised results across tests and
+// swallow the per-test mock resets. The pass-through wrapper makes the cache
+// transparent in the unit-test environment.
+vi.mock("next/cache", () => ({
+  unstable_cache: <T extends (...args: never[]) => unknown>(fn: T) => fn,
+  revalidateTag: vi.fn(),
+  revalidatePath: vi.fn(),
+}));
+
 import sitemap from "@/app/sitemap";
 
 beforeEach(() => {
@@ -39,8 +48,12 @@ describe("sitemap", () => {
 
     await sitemap();
 
-    expect(categoryListMock).toHaveBeenCalledWith({ publishedOnly: true });
-    expect(productListMock).toHaveBeenCalledWith({ publishedOnly: true });
+    expect(categoryListMock).toHaveBeenCalledWith(
+      expect.objectContaining({ publishedOnly: true }),
+    );
+    expect(productListMock).toHaveBeenCalledWith(
+      expect.objectContaining({ publishedOnly: true }),
+    );
   });
 
   it("emits an entry per published category and product with lastModified", async () => {

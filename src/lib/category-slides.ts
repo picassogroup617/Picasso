@@ -22,22 +22,31 @@ function shuffle<T>(arr: readonly T[]): T[] {
 export async function loadCategorySlides(
   categoryIds: readonly string[],
 ): Promise<Map<string, SlideImage[]>> {
+  const result = new Map<string, SlideImage[]>(categoryIds.map((id) => [id, []]));
+  if (categoryIds.length === 0) return result;
+
   const { productService } = getContainer();
-  const entries = await Promise.all(
-    categoryIds.map(async (id): Promise<[string, SlideImage[]]> => {
-      const products = await productService.list({
-        categoryId: id,
-        publishedOnly: true,
-      });
-      const all: SlideImage[] = products.flatMap((p) =>
-        p.images.map((img) => ({ url: img.url, alt: img.alt ?? p.name })),
-      );
-      const picked =
-        all.length <= CATEGORY_SLIDESHOW_MAX
-          ? all
-          : shuffle(all).slice(0, CATEGORY_SLIDESHOW_MAX);
-      return [id, picked];
-    }),
-  );
-  return new Map(entries);
+  // One batched query for every category instead of N parallel reads.
+  const products = await productService.list({
+    categoryIds,
+    publishedOnly: true,
+  });
+
+  const buckets = new Map<string, SlideImage[]>(categoryIds.map((id) => [id, []]));
+  for (const p of products) {
+    const bucket = buckets.get(p.categoryId);
+    if (!bucket) continue;
+    for (const img of p.images) {
+      bucket.push({ url: img.url, alt: img.alt ?? p.name });
+    }
+  }
+
+  for (const [id, all] of buckets) {
+    const picked =
+      all.length <= CATEGORY_SLIDESHOW_MAX
+        ? all
+        : shuffle(all).slice(0, CATEGORY_SLIDESHOW_MAX);
+    result.set(id, picked);
+  }
+  return result;
 }

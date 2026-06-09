@@ -40,7 +40,8 @@ export class SiteContentService {
     const imageUrl = allowsImage ? input.imageUrl ?? null : null;
     const imagePublicId = allowsImage ? input.imagePublicId ?? null : null;
 
-    const existing = await this.repo.findByKey(input.key);
+    // Read only what the image-cleanup diff needs instead of the full row.
+    const previousImagePublicId = await this.repo.findImagePublicIdByKey(input.key);
     const saved = await this.repo.upsert({
       key: input.key,
       title: input.title,
@@ -49,11 +50,8 @@ export class SiteContentService {
       imagePublicId,
     });
 
-    if (
-      existing?.imagePublicId &&
-      existing.imagePublicId !== saved.imagePublicId
-    ) {
-      await cleanupDetachedImages([existing.imagePublicId], {
+    if (previousImagePublicId && previousImagePublicId !== saved.imagePublicId) {
+      await cleanupDetachedImages([previousImagePublicId], {
         images: this.images,
         imageUsage: this.imageUsage,
       });

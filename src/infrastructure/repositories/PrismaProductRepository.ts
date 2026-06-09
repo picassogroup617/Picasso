@@ -55,8 +55,15 @@ export class PrismaProductRepository implements IProductRepository {
   }
 
   async list(filters?: ProductListFilters): Promise<Product[]> {
-    const where: { categoryId?: string; isPublished?: boolean } = {};
-    if (filters?.categoryId) where.categoryId = filters.categoryId;
+    const where: {
+      categoryId?: string | { in: string[] };
+      isPublished?: boolean;
+    } = {};
+    if (filters?.categoryIds && filters.categoryIds.length > 0) {
+      where.categoryId = { in: [...filters.categoryIds] };
+    } else if (filters?.categoryId) {
+      where.categoryId = filters.categoryId;
+    }
     if (filters?.publishedOnly) where.isPublished = true;
     const rows = await this.db.product.findMany({
       where: Object.keys(where).length ? where : undefined,
@@ -81,6 +88,14 @@ export class PrismaProductRepository implements IProductRepository {
       include: { images: true },
     });
     return row ? this.toEntity(row) : null;
+  }
+
+  async findSlugsStartingWith(prefix: string): Promise<string[]> {
+    const rows = await this.db.product.findMany({
+      where: { slug: { startsWith: prefix } },
+      select: { slug: true },
+    });
+    return rows.map((r) => r.slug);
   }
 
   async create(data: CreateProductData): Promise<Product> {

@@ -30,6 +30,8 @@ export interface UpdateProductData {
 
 export interface ProductListFilters {
   categoryId?: string;
+  /** Batched form of {@link categoryId}; matches products in any of the ids. */
+  categoryIds?: readonly string[];
   /** When true, only `isPublished` products are returned. */
   publishedOnly?: boolean;
   /** Hard cap on returned rows. */
@@ -40,6 +42,11 @@ export interface IProductRepository {
   list(filters?: ProductListFilters): Promise<Product[]>;
   findById(id: string): Promise<Product | null>;
   findBySlug(slug: string): Promise<Product | null>;
+  /**
+   * Returns every slug that begins with `prefix`. Used by the slug
+   * uniqueness resolver to avoid an N-step lookup loop on collisions.
+   */
+  findSlugsStartingWith(prefix: string): Promise<string[]>;
   create(data: CreateProductData): Promise<Product>;
   update(id: string, data: UpdateProductData): Promise<Product>;
   delete(id: string): Promise<void>;

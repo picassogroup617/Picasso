@@ -23,6 +23,9 @@ function makeRepo(): IUserRepository {
     findById: vi.fn(),
     findByEmail: vi.fn(),
     findByEmailWithCredentials: vi.fn(),
+    findByIdWithCredentials: vi.fn(),
+    existsByEmail: vi.fn().mockResolvedValue(false),
+    countActiveAdmins: vi.fn().mockResolvedValue(1),
     create: vi.fn(),
     list: vi.fn(),
     update: vi.fn(),
@@ -50,7 +53,7 @@ beforeEach(() => {
 
 describe("UserService.create", () => {
   it("rejects when the email is already taken", async () => {
-    (repo.findByEmail as ReturnType<typeof vi.fn>).mockResolvedValue(makeUser());
+    (repo.existsByEmail as ReturnType<typeof vi.fn>).mockResolvedValue(true);
     await expect(
       service.create({
         email: "user@example.com",
@@ -63,7 +66,7 @@ describe("UserService.create", () => {
   });
 
   it("hashes the password before persisting", async () => {
-    (repo.findByEmail as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    (repo.existsByEmail as ReturnType<typeof vi.fn>).mockResolvedValue(false);
     (repo.create as ReturnType<typeof vi.fn>).mockImplementation(async (d) =>
       makeUser({ id: "new", email: d.email, name: d.name, role: d.role }),
     );
@@ -102,22 +105,17 @@ describe("UserService.update", () => {
   it("blocks demoting the last active admin", async () => {
     const target = makeUser({ id: "a1", role: Role.ADMIN });
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(target);
-    (repo.list as ReturnType<typeof vi.fn>).mockResolvedValue([
-      target,
-      makeUser({ id: "v1", role: Role.VIEWER }),
-    ]);
+    (repo.countActiveAdmins as ReturnType<typeof vi.fn>).mockResolvedValue(0);
     await expect(
       service.update("a1", "other", { name: "T", role: Role.EDITOR, isActive: true }),
     ).rejects.toThrow(/at least one active admin/i);
+    expect(repo.countActiveAdmins).toHaveBeenCalledWith("a1");
   });
 
   it("allows demoting an admin when another active admin remains", async () => {
     const target = makeUser({ id: "a1", role: Role.ADMIN });
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(target);
-    (repo.list as ReturnType<typeof vi.fn>).mockResolvedValue([
-      target,
-      makeUser({ id: "a2", role: Role.ADMIN, isActive: true }),
-    ]);
+    (repo.countActiveAdmins as ReturnType<typeof vi.fn>).mockResolvedValue(1);
     (repo.update as ReturnType<typeof vi.fn>).mockResolvedValue(
       makeUser({ id: "a1", role: Role.EDITOR }),
     );
@@ -142,7 +140,7 @@ describe("UserService.delete", () => {
   it("blocks deleting the last active admin", async () => {
     const target = makeUser({ id: "a1", role: Role.ADMIN });
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(target);
-    (repo.list as ReturnType<typeof vi.fn>).mockResolvedValue([target]);
+    (repo.countActiveAdmins as ReturnType<typeof vi.fn>).mockResolvedValue(0);
     await expect(service.delete("a1", "other")).rejects.toThrow(
       /at least one active admin/i,
     );
@@ -153,9 +151,8 @@ describe("UserService.delete", () => {
 describe("UserService.changeOwnPassword", () => {
   it("rejects when the current password does not verify", async () => {
     const u = makeUser({ id: "u1" });
-    (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(u);
     const creds: UserWithCredentials = { ...u, passwordHash: "hashed:correct" };
-    (repo.findByEmailWithCredentials as ReturnType<typeof vi.fn>).mockResolvedValue(creds);
+    (repo.findByIdWithCredentials as ReturnType<typeof vi.fn>).mockResolvedValue(creds);
 
     await expect(
       service.changeOwnPassword("u1", { currentPassword: "wrong", newPassword: "newpass12" }),
@@ -165,9 +162,8 @@ describe("UserService.changeOwnPassword", () => {
 
   it("stores a hash of the new password when the current one verifies", async () => {
     const u = makeUser({ id: "u1" });
-    (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(u);
     const creds: UserWithCredentials = { ...u, passwordHash: "hashed:correct" };
-    (repo.findByEmailWithCredentials as ReturnType<typeof vi.fn>).mockResolvedValue(creds);
+    (repo.findByIdWithCredentials as ReturnType<typeof vi.fn>).mockResolvedValue(creds);
 
     await service.changeOwnPassword("u1", {
       currentPassword: "correct",

@@ -10,6 +10,11 @@ export interface UpsertSiteContentData {
 
 export interface ISiteContentRepository {
   findByKey(key: string): Promise<SiteContent | null>;
+  /**
+   * Projection used by the upsert flow to detect a changed imagePublicId
+   * without round-tripping the full row.
+   */
+  findImagePublicIdByKey(key: string): Promise<string | null>;
   list(): Promise<SiteContent[]>;
   upsert(data: UpsertSiteContentData): Promise<SiteContent>;
 }

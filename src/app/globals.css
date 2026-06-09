@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --font-sans: "Inter", system-ui, sans-serif;
-    --font-display: "Inter", system-ui, sans-serif;
+    /* --font-sans / --font-display / --font-mono are injected by next/font
+       on the <html> element. Do not override them here. */
     --color-bg: #ffffff;
     --color-fg: #18181b;
     --color-muted: #71717a;

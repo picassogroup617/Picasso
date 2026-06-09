@@ -1,8 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft } from "lucide-react";
-import { getContainer } from "@/lib/container";
 import { QuoteRequestButton } from "@/components/public/QuoteRequestButton";
+import {
+  getPublishedCategoryBySlug,
+  getPublishedProductsByCategory,
+} from "@/lib/public-cache";
 
 interface CategoryDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -12,8 +15,7 @@ export const revalidate = 300;
 
 export async function generateMetadata({ params }: CategoryDetailPageProps) {
   const { slug } = await params;
-  const { categoryService } = getContainer();
-  const category = await categoryService.findBySlug(slug);
+  const category = await getPublishedCategoryBySlug(slug);
   if (!category || !category.isPublished) {
     return { title: "Category not found" };
   }
@@ -31,17 +33,13 @@ export default async function CategoryDetailPage({
   params,
 }: CategoryDetailPageProps) {
   const { slug } = await params;
-  const { categoryService, productService } = getContainer();
-  const category = await categoryService.findBySlug(slug);
+  const category = await getPublishedCategoryBySlug(slug);
 
   if (!category || !category.isPublished) {
     return <CategoryNotFound />;
   }
 
-  const products = await productService.list({
-    categoryId: category.id,
-    publishedOnly: true,
-  });
+  const products = await getPublishedProductsByCategory(category.id);
 
   return (
     <>

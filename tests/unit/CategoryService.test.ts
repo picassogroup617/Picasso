@@ -39,6 +39,8 @@ function makeRepo(): ICategoryRepository {
     list: vi.fn(),
     findById: vi.fn(),
     findBySlug: vi.fn(),
+    existsById: vi.fn().mockResolvedValue(true),
+    findSlugsStartingWith: vi.fn().mockResolvedValue([]),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
@@ -51,7 +53,15 @@ function makeImages(): IImageStorage {
 }
 
 function makeImageUsage(refCount = 0): IImageUsage {
-  return { countReferences: vi.fn().mockResolvedValue(refCount) };
+  return {
+    countReferences: vi.fn().mockResolvedValue(refCount),
+    countReferencesMany: vi
+      .fn()
+      .mockImplementation(
+        async (ids: readonly string[]) =>
+          new Map(ids.map((id) => [id, refCount])),
+      ),
+  };
 }
 
 let repo: ICategoryRepository;
@@ -100,17 +110,17 @@ describe("CategoryService.create", () => {
   });
 
   it("appends a numeric suffix when the slug collides", async () => {
-    const findBySlug = repo.findBySlug as ReturnType<typeof vi.fn>;
-    findBySlug
-      .mockResolvedValueOnce(makeCategory({ id: "other", slug: "widgets" }))
-      .mockResolvedValueOnce(makeCategory({ id: "other2", slug: "widgets-2" }))
-      .mockResolvedValueOnce(null);
+    (repo.findSlugsStartingWith as ReturnType<typeof vi.fn>).mockResolvedValue([
+      "widgets",
+      "widgets-2",
+    ]);
     (repo.create as ReturnType<typeof vi.fn>).mockImplementation(async (d) =>
       makeCategory({ slug: d.slug }),
     );
 
     await service.create(makeInput({ name: "Widgets" }));
 
+    expect(repo.findSlugsStartingWith).toHaveBeenCalledWith("widgets");
     expect(repo.create).toHaveBeenCalledWith(
       expect.objectContaining({ slug: "widgets-3" }),
     );
@@ -127,7 +137,7 @@ describe("CategoryService.update", () => {
 
     await service.update("c1", makeInput({ name: "Widgets" }));
 
-    expect(repo.findBySlug).not.toHaveBeenCalled();
+    expect(repo.findSlugsStartingWith).not.toHaveBeenCalled();
     expect(repo.update).toHaveBeenCalledWith(
       "c1",
       expect.objectContaining({ slug: "widgets" }),
@@ -185,14 +195,16 @@ describe("CategoryService.update", () => {
     (repo.update as ReturnType<typeof vi.fn>).mockImplementation(async (_id, d) =>
       makeCategory({ ...existing, ...d }),
     );
-    (imageUsage.countReferences as ReturnType<typeof vi.fn>).mockResolvedValue(2);
+    (imageUsage.countReferencesMany as ReturnType<typeof vi.fn>).mockResolvedValue(
+      new Map([["shared/id", 2]]),
+    );
 
     await service.update(
       "c1",
       makeInput({ imageUrl: "https://cdn/new.jpg", imagePublicId: "new/id" }),
     );
 
-    expect(imageUsage.countReferences).toHaveBeenCalledWith("shared/id");
+    expect(imageUsage.countReferencesMany).toHaveBeenCalledWith(["shared/id"]);
     expect(images.delete).not.toHaveBeenCalled();
   });
 

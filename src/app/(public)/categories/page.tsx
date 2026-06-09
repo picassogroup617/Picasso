@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getContainer } from "@/lib/container";
 import { QuoteRequestButton } from "@/components/public/QuoteRequestButton";
 import { CategoryImageSlideshow } from "@/components/public/CategoryImageSlideshow";
-import { loadCategorySlides } from "@/lib/category-slides";
+import {
+  getCategorySlides,
+  getPublishedCategories,
+} from "@/lib/public-cache";
 
 export const metadata = {
   title: "Categories",
@@ -12,9 +14,8 @@ export const metadata = {
 export const revalidate = 300;
 
 export default async function CategoriesIndexPage() {
-  const { categoryService } = getContainer();
-  const categories = await categoryService.list({ publishedOnly: true });
-  const slidesByCategory = await loadCategorySlides(categories.map((c) => c.id));
+  const categories = await getPublishedCategories();
+  const slidesByCategory = await getCategorySlides(categories.map((c) => c.id));
 
   return (
     <>

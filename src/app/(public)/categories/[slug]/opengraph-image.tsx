@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getContainer } from "@/lib/container";
+import { getPublishedCategoryBySlug } from "@/lib/public-cache";
 
 export const alt = "Category";
 export const size = { width: 1200, height: 630 };
@@ -24,7 +24,7 @@ export default async function OgCategory({ params }: Props) {
   let imageUrl: string | null = null;
 
   try {
-    const category = await getContainer().categoryService.findBySlug(slug);
+    const category = await getPublishedCategoryBySlug(slug);
     if (category && category.isPublished) {
       name = category.name;
       description = category.shortDescription;

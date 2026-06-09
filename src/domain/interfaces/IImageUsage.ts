@@ -9,4 +9,10 @@
  */
 export interface IImageUsage {
   countReferences(publicId: string): Promise<number>;
+  /**
+   * Batched form of {@link countReferences}. Returns a map keyed by publicId
+   * with the aggregate reference count across every table that stores one.
+   * Missing keys are treated as zero references.
+   */
+  countReferencesMany(publicIds: readonly string[]): Promise<Map<string, number>>;
 }

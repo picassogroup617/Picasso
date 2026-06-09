@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getContainer } from "@/lib/container";
+import { getPublishedProductBySlug } from "@/lib/public-cache";
 
 export const alt = "Product";
 export const size = { width: 1200, height: 630 };
@@ -24,7 +24,7 @@ export default async function OgProduct({ params }: Props) {
   let imageUrl: string | null = null;
 
   try {
-    const product = await getContainer().productService.findBySlug(slug);
+    const product = await getPublishedProductBySlug(slug);
     if (product && product.isPublished) {
       name = product.name;
       description = product.longDescription;

@@ -39,15 +39,15 @@ export class ProductService {
 
   private async resolveUniqueSlug(
     desired: string,
-    ignoreId?: string,
+    ignoreSlug?: string,
   ): Promise<string> {
     const base = slugify(desired) || "product";
-    let candidate = base;
-    let n = 2;
-    while (true) {
-      const existing = await this.repo.findBySlug(candidate);
-      if (!existing || existing.id === ignoreId) return candidate;
-      candidate = `${base}-${n++}`;
+    const taken = new Set(await this.repo.findSlugsStartingWith(base));
+    if (ignoreSlug) taken.delete(ignoreSlug);
+    if (!taken.has(base)) return base;
+    for (let n = 2; ; n++) {
+      const candidate = `${base}-${n}`;
+      if (!taken.has(candidate)) return candidate;
     }
   }
 
@@ -61,8 +61,9 @@ export class ProductService {
   }
 
   private async ensureCategoryExists(categoryId: string) {
-    const cat = await this.categories.findById(categoryId);
-    if (!cat) throw new Error("Selected category no longer exists.");
+    if (!(await this.categories.existsById(categoryId))) {
+      throw new Error("Selected category no longer exists.");
+    }
   }
 
   async create(input: ProductInput): Promise<Product> {
@@ -88,7 +89,7 @@ export class ProductService {
     const slug =
       slugify(desiredSlug) === existing.slug
         ? existing.slug
-        : await this.resolveUniqueSlug(desiredSlug, id);
+        : await this.resolveUniqueSlug(desiredSlug, existing.slug);
 
     const nextImages = this.normaliseImages(input.images);
     const saved = await this.repo.update(id, {

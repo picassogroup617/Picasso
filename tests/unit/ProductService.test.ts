@@ -67,6 +67,7 @@ function makeProductRepo(): IProductRepository {
     list: vi.fn(),
     findById: vi.fn(),
     findBySlug: vi.fn(),
+    findSlugsStartingWith: vi.fn().mockResolvedValue([]),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
@@ -78,6 +79,8 @@ function makeCategoryRepo(): ICategoryRepository {
     list: vi.fn(),
     findById: vi.fn(),
     findBySlug: vi.fn(),
+    existsById: vi.fn().mockResolvedValue(true),
+    findSlugsStartingWith: vi.fn().mockResolvedValue([]),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
@@ -90,7 +93,15 @@ function makeImages(): IImageStorage {
 }
 
 function makeImageUsage(refCount = 0): IImageUsage {
-  return { countReferences: vi.fn().mockResolvedValue(refCount) };
+  return {
+    countReferences: vi.fn().mockResolvedValue(refCount),
+    countReferencesMany: vi
+      .fn()
+      .mockImplementation(
+        async (ids: readonly string[]) =>
+          new Map(ids.map((id) => [id, refCount])),
+      ),
+  };
 }
 
 let products: IProductRepository;
@@ -125,14 +136,12 @@ describe("ProductService read paths", () => {
 
 describe("ProductService.create", () => {
   it("rejects when the category does not exist", async () => {
-    (categories.findById as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    (categories.existsById as ReturnType<typeof vi.fn>).mockResolvedValue(false);
     await expect(service.create(makeInput())).rejects.toThrow(/category no longer exists/i);
     expect(products.create).not.toHaveBeenCalled();
   });
 
   it("auto-generates a slug and normalises image order", async () => {
-    (categories.findById as ReturnType<typeof vi.fn>).mockResolvedValue(makeCategory());
-    (products.findBySlug as ReturnType<typeof vi.fn>).mockResolvedValue(null);
     (products.create as ReturnType<typeof vi.fn>).mockImplementation(async (d) =>
       makeProduct({ slug: d.slug }),
     );
@@ -159,17 +168,16 @@ describe("ProductService.create", () => {
   });
 
   it("resolves slug collisions by appending a numeric suffix", async () => {
-    (categories.findById as ReturnType<typeof vi.fn>).mockResolvedValue(makeCategory());
-    const findBySlug = products.findBySlug as ReturnType<typeof vi.fn>;
-    findBySlug
-      .mockResolvedValueOnce(makeProduct({ id: "other", slug: "widget" }))
-      .mockResolvedValueOnce(null);
+    (products.findSlugsStartingWith as ReturnType<typeof vi.fn>).mockResolvedValue([
+      "widget",
+    ]);
     (products.create as ReturnType<typeof vi.fn>).mockImplementation(async (d) =>
       makeProduct({ slug: d.slug }),
     );
 
     await service.create(makeInput({ name: "Widget" }));
 
+    expect(products.findSlugsStartingWith).toHaveBeenCalledWith("widget");
     expect(products.create).toHaveBeenCalledWith(
       expect.objectContaining({ slug: "widget-2" }),
     );
@@ -191,7 +199,6 @@ describe("ProductService.update", () => {
       ],
     });
     (products.findById as ReturnType<typeof vi.fn>).mockResolvedValue(existing);
-    (categories.findById as ReturnType<typeof vi.fn>).mockResolvedValue(makeCategory());
     (products.update as ReturnType<typeof vi.fn>).mockImplementation(async (_id, d) =>
       makeProduct({ ...existing, ...d }),
     );
@@ -213,14 +220,13 @@ describe("ProductService.update", () => {
   it("keeps the existing slug when the name slugifies to the same value", async () => {
     const existing = makeProduct({ slug: "widget" });
     (products.findById as ReturnType<typeof vi.fn>).mockResolvedValue(existing);
-    (categories.findById as ReturnType<typeof vi.fn>).mockResolvedValue(makeCategory());
     (products.update as ReturnType<typeof vi.fn>).mockImplementation(async (_id, d) =>
       makeProduct({ ...existing, ...d }),
     );
 
     await service.update("p1", makeInput({ name: "Widget" }));
 
-    expect(products.findBySlug).not.toHaveBeenCalled();
+    expect(products.findSlugsStartingWith).not.toHaveBeenCalled();
     expect(products.update).toHaveBeenCalledWith(
       "p1",
       expect.objectContaining({ slug: "widget" }),
@@ -264,8 +270,11 @@ describe("ProductService.delete", () => {
         ],
       }),
     );
-    (imageUsage.countReferences as ReturnType<typeof vi.fn>).mockImplementation(
-      async (pid: string) => (pid === "p/shared" ? 1 : 0),
+    (imageUsage.countReferencesMany as ReturnType<typeof vi.fn>).mockResolvedValue(
+      new Map([
+        ["p/shared", 1],
+        ["p/orphan", 0],
+      ]),
     );
 
     await service.delete("p1");

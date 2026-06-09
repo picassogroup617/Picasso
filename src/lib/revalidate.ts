@@ -1,14 +1,20 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { PUBLIC_CACHE_TAGS } from "@/lib/public-cache";
 
 /**
  * Centralised helpers for invalidating Next.js route cache after admin
  * mutations. Pages that depend on data from multiple admin sections
  * (e.g. the public home + footer) are revalidated here so callers do
  * not have to remember every dependent path.
+ *
+ * Each helper invalidates both the route-level cache (`revalidatePath`)
+ * and the data-cache tags used by `src/lib/public-cache.ts` so unstable_cache
+ * entries are dropped immediately on the next request.
  */
 
 /** Public pages that surface category data. */
 export function revalidatePublicCategoryPaths(): void {
+  revalidateTag(PUBLIC_CACHE_TAGS.categories);
   revalidatePath("/");
   revalidatePath("/categories");
   // Each `categories/[slug]` page caches independently; revalidate the
@@ -18,6 +24,8 @@ export function revalidatePublicCategoryPaths(): void {
 
 /** Public pages that surface product data. */
 export function revalidatePublicProductPaths(): void {
+  revalidateTag(PUBLIC_CACHE_TAGS.products);
+  revalidateTag(PUBLIC_CACHE_TAGS.categories);
   revalidatePath("/");
   revalidatePath("/categories");
   revalidatePath("/categories/[slug]", "page");
@@ -29,5 +37,6 @@ export function revalidatePublicProductPaths(): void {
  * layout, so revalidating the layout cascades to every public page.
  */
 export function revalidatePublicLayoutPaths(): void {
+  revalidateTag(PUBLIC_CACHE_TAGS.siteContent);
   revalidatePath("/", "layout");
 }

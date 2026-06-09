@@ -35,8 +35,7 @@ export class UserService {
   }
 
   async create(input: CreateUserInput): Promise<User> {
-    const existing = await this.users.findByEmail(input.email);
-    if (existing) {
+    if (await this.users.existsByEmail(input.email)) {
       throw new Error("A user with this email already exists.");
     }
     const passwordHash = await this.hasher.hash(input.password);
@@ -74,9 +73,7 @@ export class UserService {
   }
 
   async changeOwnPassword(id: string, input: ChangeOwnPasswordInput): Promise<void> {
-    const current = await this.users.findByEmailWithCredentials(
-      (await this.users.findById(id))?.email ?? "",
-    );
+    const current = await this.users.findByIdWithCredentials(id);
     if (!current) throw new Error("User not found.");
 
     const ok = await this.hasher.verify(input.currentPassword, current.passwordHash);
@@ -105,11 +102,8 @@ export class UserService {
   }
 
   private async ensureNotLastActiveAdmin(excludingUserId: string) {
-    const all = await this.users.list();
-    const otherActiveAdmins = all.filter(
-      (u) => u.id !== excludingUserId && u.role === Role.ADMIN && u.isActive,
-    );
-    if (otherActiveAdmins.length === 0) {
+    const remaining = await this.users.countActiveAdmins(excludingUserId);
+    if (remaining === 0) {
       throw new Error("At least one active admin must remain.");
     }
   }

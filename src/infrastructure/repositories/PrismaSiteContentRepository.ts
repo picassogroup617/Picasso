@@ -29,6 +29,14 @@ export class PrismaSiteContentRepository implements ISiteContentRepository {
     return row ? this.toEntity(row) : null;
   }
 
+  async findImagePublicIdByKey(key: string): Promise<string | null> {
+    const row = await this.db.siteContent.findUnique({
+      where: { key },
+      select: { imagePublicId: true },
+    });
+    return row?.imagePublicId ?? null;
+  }
+
   async list(): Promise<SiteContent[]> {
     const rows = await this.db.siteContent.findMany({ orderBy: { key: "asc" } });
     return rows.map((r) => this.toEntity(r));

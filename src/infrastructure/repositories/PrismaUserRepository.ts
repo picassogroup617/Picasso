@@ -42,6 +42,30 @@ export class PrismaUserRepository implements IUserRepository {
     return { ...this.toUser(row), passwordHash: row.passwordHash };
   }
 
+  async findByIdWithCredentials(id: string): Promise<UserWithCredentials | null> {
+    const row = await this.db.user.findUnique({ where: { id } });
+    if (!row) return null;
+    return { ...this.toUser(row), passwordHash: row.passwordHash };
+  }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    const row = await this.db.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+    return row !== null;
+  }
+
+  async countActiveAdmins(excludingUserId?: string): Promise<number> {
+    return this.db.user.count({
+      where: {
+        role: "ADMIN",
+        isActive: true,
+        ...(excludingUserId ? { id: { not: excludingUserId } } : {}),
+      },
+    });
+  }
+
   async create(input: CreateUserInput): Promise<User> {
     const row = await this.db.user.create({
       data: {

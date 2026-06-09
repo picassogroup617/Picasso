@@ -25,9 +25,12 @@ export async function cleanupDetachedImages(
   );
   if (unique.length === 0) return;
 
+  // One batched DB roundtrip instead of N parallel count queries per asset.
+  const refsByPublicId = await deps.imageUsage.countReferencesMany(unique);
+
   const results = await Promise.allSettled(
     unique.map(async (publicId) => {
-      const refs = await deps.imageUsage.countReferences(publicId);
+      const refs = refsByPublicId.get(publicId) ?? 0;
       if (refs > 0) return;
       await deps.images.delete(publicId);
     }),

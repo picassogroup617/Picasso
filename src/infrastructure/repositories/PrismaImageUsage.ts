@@ -18,4 +18,49 @@ export class PrismaImageUsage implements IImageUsage {
     ]);
     return categories + productImages + siteContent;
   }
+
+  async countReferencesMany(
+    publicIds: readonly string[],
+  ): Promise<Map<string, number>> {
+    const unique = Array.from(new Set(publicIds.filter((p) => Boolean(p))));
+    const result = new Map<string, number>(unique.map((id) => [id, 0]));
+    if (unique.length === 0) return result;
+
+    // Three grouped queries (one per table) instead of 3·N counts.
+    const [categoryGroups, productImageGroups, siteContentGroups] =
+      await Promise.all([
+        this.db.category.groupBy({
+          by: ["imagePublicId"],
+          where: { imagePublicId: { in: unique } },
+          _count: { _all: true },
+        }),
+        this.db.productImage.groupBy({
+          by: ["publicId"],
+          where: { publicId: { in: unique } },
+          _count: { _all: true },
+        }),
+        this.db.siteContent.groupBy({
+          by: ["imagePublicId"],
+          where: { imagePublicId: { in: unique } },
+          _count: { _all: true },
+        }),
+      ]);
+
+    for (const g of categoryGroups) {
+      if (g.imagePublicId) {
+        result.set(g.imagePublicId, (result.get(g.imagePublicId) ?? 0) + g._count._all);
+      }
+    }
+    for (const g of productImageGroups) {
+      if (g.publicId) {
+        result.set(g.publicId, (result.get(g.publicId) ?? 0) + g._count._all);
+      }
+    }
+    for (const g of siteContentGroups) {
+      if (g.imagePublicId) {
+        result.set(g.imagePublicId, (result.get(g.imagePublicId) ?? 0) + g._count._all);
+      }
+    }
+    return result;
+  }
 }

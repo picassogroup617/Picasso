@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getContainer } from "@/lib/container";
 import { QuoteRequestButton } from "@/components/public/QuoteRequestButton";
 import { CategoryImageSlideshow } from "@/components/public/CategoryImageSlideshow";
 import { HeroBackground } from "@/components/public/HeroBackground";
-import { loadCategorySlides } from "@/lib/category-slides";
+import {
+  getCategorySlides,
+  getPublishedCategories,
+  getSiteContent,
+} from "@/lib/public-cache";
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "Picasso";
 const FALLBACK_TAGLINE =
@@ -15,8 +18,7 @@ const FALLBACK_TAGLINE =
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { siteContentService } = getContainer();
-  const hero = await siteContentService.getByKey("hero").catch(() => null);
+  const hero = await getSiteContent("hero").catch(() => null);
   const title = hero?.title ?? `${SITE_NAME} — ${FALLBACK_TAGLINE}`;
   const description = hero?.description ?? `${SITE_NAME}. ${FALLBACK_TAGLINE}.`;
   return {
@@ -27,15 +29,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const { siteContentService, categoryService } = getContainer();
   const [hero, story, vision, categories] = await Promise.all([
-    siteContentService.getByKey("hero"),
-    siteContentService.getByKey("our_story"),
-    siteContentService.getByKey("our_vision"),
-    categoryService.list({ publishedOnly: true, limit: 6 }),
+    getSiteContent("hero"),
+    getSiteContent("our_story"),
+    getSiteContent("our_vision"),
+    getPublishedCategories(6),
   ]);
 
-  const slidesByCategory = await loadCategorySlides(categories.map((c) => c.id));
+  const slidesByCategory = await getCategorySlides(categories.map((c) => c.id));
 
   const heroTitle = hero?.title ?? SITE_NAME;
   const heroTagline = hero?.description ?? FALLBACK_TAGLINE;
@@ -54,7 +55,7 @@ export default async function HomePage() {
               priority
               className="mx-auto h-28 w-auto sm:h-36"
             />
-            <h1 className="mt-3 line-clamp-2 text-balance font-script text-4xl leading-[1.15] text-brand-gray-900 sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="mt-3 line-clamp-2 text-balance font-display text-4xl font-semibold leading-[1.1] tracking-tight text-brand-gray-900 sm:text-5xl md:text-6xl lg:text-7xl">
               {heroTitle}
             </h1>
             <hr className="mx-auto mt-4 max-w-2xl border-t border-brand-gray-300" />

@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
-import { getContainer } from "@/lib/container";
+import {
+  getAllPublishedProducts,
+  getPublishedCategories,
+} from "@/lib/public-cache";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -16,10 +19,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const { categoryService, productService } = getContainer();
     const [categories, products] = await Promise.all([
-      categoryService.list({ publishedOnly: true }),
-      productService.list({ publishedOnly: true }),
+      getPublishedCategories(),
+      getAllPublishedProducts(),
     ]);
 
     const categoryEntries: MetadataRoute.Sitemap = categories.map((c) => ({

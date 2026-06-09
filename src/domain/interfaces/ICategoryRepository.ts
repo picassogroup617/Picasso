@@ -31,6 +31,13 @@ export interface ICategoryRepository {
   list(filters?: CategoryListFilters): Promise<Category[]>;
   findById(id: string): Promise<Category | null>;
   findBySlug(slug: string): Promise<Category | null>;
+  /** Lightweight existence check used by service-layer validation. */
+  existsById(id: string): Promise<boolean>;
+  /**
+   * Returns every slug that begins with `prefix`. Used by the slug
+   * uniqueness resolver to avoid an N-step lookup loop on collisions.
+   */
+  findSlugsStartingWith(prefix: string): Promise<string[]>;
   create(data: CreateCategoryData): Promise<Category>;
   update(id: string, data: UpdateCategoryData): Promise<Category>;
   delete(id: string): Promise<void>;

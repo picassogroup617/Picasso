@@ -37,20 +37,22 @@ export class CategoryService {
   /**
    * Returns a slug that is unique across all categories. If `desired` is
    * already taken, suffixes `-2`, `-3`, ... until a free slot is found.
-   * `ignoreId` lets the caller skip its own record during updates.
+   * `ignoreSlug` lets the caller skip its own record during updates.
+   *
+   * Uses one batched lookup over the slug prefix instead of probing
+   * candidates one round-trip at a time.
    */
   private async resolveUniqueSlug(
     desired: string,
-    ignoreId?: string,
+    ignoreSlug?: string,
   ): Promise<string> {
     const base = slugify(desired) || "category";
-    let candidate = base;
-    let n = 2;
-    // Loop bounded by name collisions; practical upper bound is tiny.
-    while (true) {
-      const existing = await this.repo.findBySlug(candidate);
-      if (!existing || existing.id === ignoreId) return candidate;
-      candidate = `${base}-${n++}`;
+    const taken = new Set(await this.repo.findSlugsStartingWith(base));
+    if (ignoreSlug) taken.delete(ignoreSlug);
+    if (!taken.has(base)) return base;
+    for (let n = 2; ; n++) {
+      const candidate = `${base}-${n}`;
+      if (!taken.has(candidate)) return candidate;
     }
   }
 
@@ -75,7 +77,7 @@ export class CategoryService {
     const slug =
       slugify(desiredSlug) === existing.slug
         ? existing.slug
-        : await this.resolveUniqueSlug(desiredSlug, id);
+        : await this.resolveUniqueSlug(desiredSlug, existing.slug);
 
     const saved = await this.repo.update(id, {
       slug,

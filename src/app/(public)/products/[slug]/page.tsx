@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { getContainer } from "@/lib/container";
 import { ProductGallery } from "@/components/public/ProductGallery";
 import { QuoteRequestButton } from "@/components/public/QuoteRequestButton";
+import {
+  getPublishedCategoryById,
+  getPublishedProductBySlug,
+} from "@/lib/public-cache";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -12,8 +15,7 @@ export const revalidate = 300;
 
 export async function generateMetadata({ params }: ProductDetailPageProps) {
   const { slug } = await params;
-  const { productService } = getContainer();
-  const product = await productService.findBySlug(slug);
+  const product = await getPublishedProductBySlug(slug);
   if (!product || !product.isPublished) {
     return { title: "Product not found" };
   }
@@ -32,14 +34,13 @@ export default async function ProductDetailPage({
   params,
 }: ProductDetailPageProps) {
   const { slug } = await params;
-  const { productService, categoryService } = getContainer();
-  const product = await productService.findBySlug(slug);
+  const product = await getPublishedProductBySlug(slug);
 
   if (!product || !product.isPublished) {
     return <ProductNotFound />;
   }
 
-  const category = await categoryService.getById(product.categoryId);
+  const category = await getPublishedCategoryById(product.categoryId);
   const categoryVisible = Boolean(category && category.isPublished);
 
   return (
@@ -64,18 +65,20 @@ export default async function ProductDetailPage({
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
           <ProductGallery images={product.images} productName={product.name} />
 
-          <div className="flex flex-col">
+          <div className="flex min-w-0 flex-col">
             {categoryVisible && category && (
               <p className="text-xs font-medium uppercase tracking-wide text-brand-gray-500">
                 {category.name}
               </p>
             )}
-            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-brand-gray-900 sm:text-4xl">
+            <h1 className="mt-2 inline-block max-w-full self-start break-words rounded-xl bg-brand-gray-200 px-4 py-2 font-display text-3xl font-semibold tracking-tight text-brand-gray-900 sm:text-4xl">
               {product.name}
             </h1>
 
-            <div className="mt-6 whitespace-pre-wrap text-base leading-relaxed text-brand-gray-700">
-              {product.longDescription}
+            <div className="mt-6 overflow-hidden rounded-xl border border-brand-gray-200 bg-brand-white p-5 shadow-soft sm:p-6">
+              <div className="whitespace-pre-wrap break-words text-base leading-relaxed text-brand-gray-700 [overflow-wrap:anywhere]">
+                {product.longDescription}
+              </div>
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">

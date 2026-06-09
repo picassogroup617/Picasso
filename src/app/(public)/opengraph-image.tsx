@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getContainer } from "@/lib/container";
+import { getSiteContent } from "@/lib/public-cache";
 
 export const alt = "Picasso — Crafting Excellence";
 export const size = { width: 1200, height: 630 };
@@ -18,7 +18,7 @@ export default async function OgHome() {
   let title = SITE_NAME;
   let tagline = FALLBACK_TAGLINE;
   try {
-    const hero = await getContainer().siteContentService.getByKey("hero");
+    const hero = await getSiteContent("hero");
     if (hero) {
       title = hero.title;
       tagline = hero.description;

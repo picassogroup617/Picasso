@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { Role } from "@/domain/entities/role";
@@ -15,10 +16,10 @@ export interface SessionUser {
  *
  * Re-validates the user against the database on every call so that a deleted
  * or deactivated account, or a role change, takes effect immediately rather
- * than waiting up to the JWT `maxAge`. This costs one extra Prisma read per
- * protected page render — acceptable for the admin surface.
+ * than waiting up to the JWT `maxAge`. Wrapped in React's `cache()` so calls
+ * from multiple server components in the same render share one DB read.
  */
-export async function requireUser(): Promise<SessionUser> {
+export const requireUser = cache(async (): Promise<SessionUser> => {
   const session = await auth();
   if (!session?.user) {
     redirect("/picassoadd/login");
@@ -37,7 +38,7 @@ export async function requireUser(): Promise<SessionUser> {
     email: fresh.email,
     role: fresh.role,
   };
-}
+});
 
 /**
  * Loads the current session and ensures the user has one of the allowed roles.
