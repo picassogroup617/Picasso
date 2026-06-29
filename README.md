@@ -33,12 +33,4 @@ src/
 2. Copy `.env.example` → `.env.local` and fill in values
 3. `npm run dev` and open http://localhost:3000
 
-## Project Status
-
-- ✅ Phase 1: Foundation (scaffolding, theme, folder structure)
-- ✅ Phase 2: Database & Auth
-- ✅ Phase 3: Admin Panel (Picassoadd)
-- ✅ Phase 4: Public Site
-- ✅ Phase 5: Integrations (Cloudinary, SMTP/Nodemailer, Maps, SEO)
-- ✅ Phase 6: Polish & Deploy
 
