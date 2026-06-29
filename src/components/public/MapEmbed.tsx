@@ -40,14 +40,14 @@ export function MapEmbed({ url, title, caption, className }: MapEmbedProps) {
           {caption}
         </p>
       )}
-      <div className="mt-3 overflow-hidden rounded-xl border border-brand-gray-200 bg-brand-white">
+      <div className="mt-2.5 overflow-hidden rounded-lg border border-brand-gray-200 bg-brand-white">
         <iframe
           src={resolved}
           title={heading}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
           allowFullScreen
-          className="block h-64 w-full border-0"
+          className="block h-40 w-full border-0 sm:h-44"
         />
       </div>
     </section>

@@ -13,7 +13,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-2 inline-flex w-full items-center justify-center rounded-md bg-brand-yellow px-4 py-2.5 text-sm font-medium text-brand-gray-900 shadow-soft transition hover:bg-brand-yellow-hover disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-2 inline-flex w-full items-center justify-center rounded-md border border-brand-gray-550 bg-brand-gray-550 px-4 py-2.5 text-sm font-medium text-brand-white shadow-soft transition hover:bg-brand-gray-650 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? "Signing in…" : "Sign in"}
     </button>

@@ -3,10 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { QuoteRequestButton } from "@/components/public/QuoteRequestButton";
-import { CategoryImageSlideshow } from "@/components/public/CategoryImageSlideshow";
-import { HeroBackground } from "@/components/public/HeroBackground";
 import {
-  getCategorySlides,
   getPublishedCategories,
   getSiteContent,
 } from "@/lib/public-cache";
@@ -36,15 +33,24 @@ export default async function HomePage() {
     getPublishedCategories(6),
   ]);
 
-  const slidesByCategory = await getCategorySlides(categories.map((c) => c.id));
-
   const heroTitle = hero?.title ?? SITE_NAME;
   const heroTagline = hero?.description ?? FALLBACK_TAGLINE;
 
   return (
     <>
-      <section className="relative overflow-hidden border-b border-brand-gray-200 bg-gradient-to-b from-brand-yellow-soft/40 to-brand-white">
-        <HeroBackground />
+      <section className="relative overflow-hidden border-b border-brand-gray-200 bg-brand-gray-100">
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden
+        >
+          <source src="/brand/hero-video.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-brand-white/75" aria-hidden />
         <div className="container-page relative z-10 py-8 sm:py-12">
           <div className="mx-auto max-w-4xl text-center">
             <Image
@@ -55,7 +61,7 @@ export default async function HomePage() {
               priority
               className="mx-auto h-28 w-auto sm:h-36"
             />
-            <h1 className="mt-3 line-clamp-2 text-balance font-display text-4xl font-semibold leading-[1.1] tracking-tight text-brand-gray-900 sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="mt-3 whitespace-nowrap font-display text-[1.05rem] font-semibold leading-[1.1] tracking-tight text-brand-gray-900 sm:text-[1.575rem] md:text-[2.1rem] lg:text-[2.625rem]">
               {heroTitle}
             </h1>
             <hr className="mx-auto mt-4 max-w-2xl border-t border-brand-gray-300" />
@@ -108,27 +114,28 @@ export default async function HomePage() {
               Categories will appear here once published.
             </p>
           ) : (
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {categories.map((c) => (
                 <Link
                   key={c.id}
                   href={`/categories/${c.slug}`}
-                  className="group block overflow-hidden rounded-xl border border-brand-gray-200 bg-brand-white transition hover:border-brand-yellow hover:shadow-soft"
+                  aria-label={c.name}
+                  className="group block overflow-hidden rounded-[1.5rem] bg-brand-gray-100 shadow-soft transition hover:shadow-elevated"
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden bg-brand-gray-100">
-                    <CategoryImageSlideshow
-                      images={slidesByCategory.get(c.id) ?? []}
-                      fallbackUrl={c.imageUrl}
-                      fallbackAlt={c.name}
-                    />
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-display text-lg font-medium text-brand-gray-900">
-                      {c.name}
-                    </h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-brand-gray-500">
-                      {c.shortDescription}
-                    </p>
+                  <div className="relative aspect-square overflow-hidden">
+                    {c.imageUrl ? (
+                      <Image
+                        src={c.imageUrl}
+                        alt={c.name}
+                        fill
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover transition duration-300 group-hover:scale-[1.02]"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center p-6 text-center text-sm font-medium text-brand-gray-500">
+                        {c.name}
+                      </div>
+                    )}
                   </div>
                 </Link>
               ))}

@@ -26,7 +26,7 @@ export default function NotFound() {
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link
             href="/"
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-brand-yellow px-4 text-sm font-medium text-brand-gray-900 shadow-soft transition hover:bg-brand-yellow-hover"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-brand-gray-550 bg-brand-gray-550 px-4 text-sm font-medium text-brand-white shadow-soft transition hover:bg-brand-gray-650"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to home

@@ -1,11 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { QuoteRequestButton } from "@/components/public/QuoteRequestButton";
-import { CategoryImageSlideshow } from "@/components/public/CategoryImageSlideshow";
-import {
-  getCategorySlides,
-  getPublishedCategories,
-} from "@/lib/public-cache";
+import { getPublishedCategories } from "@/lib/public-cache";
 
 export const metadata = {
   title: "Categories",
@@ -15,7 +11,6 @@ export const revalidate = 300;
 
 export default async function CategoriesIndexPage() {
   const categories = await getPublishedCategories();
-  const slidesByCategory = await getCategorySlides(categories.map((c) => c.id));
 
   return (
     <>
@@ -48,30 +43,28 @@ export default async function CategoriesIndexPage() {
             </div>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {categories.map((c) => (
               <Link
                 key={c.id}
                 href={`/categories/${c.slug}`}
-                className="group block overflow-hidden rounded-xl border border-brand-gray-200 bg-brand-white transition hover:border-brand-yellow hover:shadow-soft"
+                aria-label={c.name}
+                className="group block overflow-hidden rounded-[1.5rem] bg-brand-gray-100 shadow-soft transition hover:shadow-elevated"
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-brand-gray-100">
-                  <CategoryImageSlideshow
-                    images={slidesByCategory.get(c.id) ?? []}
-                    fallbackUrl={c.imageUrl}
-                    fallbackAlt={c.name}
-                  />
-                </div>
-                <div className="flex items-start justify-between gap-3 p-5">
-                  <div>
-                    <h2 className="font-display text-lg font-medium text-brand-gray-900">
+                <div className="relative aspect-square overflow-hidden">
+                  {c.imageUrl ? (
+                    <Image
+                      src={c.imageUrl}
+                      alt={c.name}
+                      fill
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition duration-300 group-hover:scale-[1.02]"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center p-6 text-center text-sm font-medium text-brand-gray-500">
                       {c.name}
-                    </h2>
-                    <p className="mt-1 line-clamp-2 text-sm text-brand-gray-500">
-                      {c.shortDescription}
-                    </p>
-                  </div>
-                  <ArrowRight className="mt-1 h-4 w-4 flex-none text-brand-gray-500 transition group-hover:text-brand-gray-900" />
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}

@@ -38,37 +38,50 @@ export function SiteFooter({
 }: SiteFooterProps) {
   const year = new Date().getFullYear();
   return (
-    <footer id="contact" className="mt-24 border-t border-brand-gray-200 bg-brand-gray-50">
-      <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
+    <footer id="contact" className="mt-16 border-t border-brand-gray-200 bg-brand-gray-50">
+      <div className="container-page grid gap-7 py-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
         <div>
           <Image
             src="/brand/logo.png"
             alt={siteName}
             width={400}
             height={100}
-            className="h-24 w-auto"
+            className="h-16 w-auto"
           />
-          <p className="mt-3 max-w-xs text-sm text-brand-gray-500">
+          <p className="mt-2 max-w-xs text-sm leading-relaxed text-brand-gray-500">
             Crafted products, delivered with care. Reach out for a quote tailored to your needs.
           </p>
+          <h3 className="mt-4 text-xs font-medium uppercase tracking-wide text-brand-gray-500">
+            Follow
+          </h3>
+          <ul className="mt-2 flex flex-wrap gap-2.5">
+            {socialLinks.length === 0 && (
+              <li className="text-sm text-brand-gray-500">No social links yet.</li>
+            )}
+            {socialLinks.map((s) => {
+              const Icon = SOCIAL_ICON[s.platform];
+              return (
+                <li key={s.id}>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={s.label ?? s.platform}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-brand-gray-200 bg-brand-white text-brand-gray-700 transition hover:border-brand-gray-400 hover:text-brand-gray-900"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
         </div>
-
-        {address && (
-          <div>
-            <h3 className="text-xs font-medium uppercase tracking-wide text-brand-gray-500">
-              {address.title}
-            </h3>
-            <p className="mt-3 whitespace-pre-wrap text-sm text-brand-gray-700">
-              {address.description}
-            </p>
-          </div>
-        )}
 
         <div>
           <h3 className="text-xs font-medium uppercase tracking-wide text-brand-gray-500">
             Contact
           </h3>
-          <ul className="mt-3 space-y-4">
+          <ul className="mt-2.5 space-y-3">
             {contactPersons.length === 0 && (
               <li className="text-sm text-brand-gray-500">No contacts yet.</li>
             )}
@@ -101,43 +114,30 @@ export function SiteFooter({
           </ul>
         </div>
 
-        <div>
-          <h3 className="text-xs font-medium uppercase tracking-wide text-brand-gray-500">
-            Follow
-          </h3>
-          <ul className="mt-3 flex flex-wrap gap-3">
-            {socialLinks.length === 0 && (
-              <li className="text-sm text-brand-gray-500">No social links yet.</li>
+        {(address || mapEmbed) && (
+          <div>
+            {address && (
+              <>
+                <h3 className="text-xs font-medium uppercase tracking-wide text-brand-gray-500">
+                  {address.title}
+                </h3>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-brand-gray-700">
+                  {address.description}
+                </p>
+              </>
             )}
-            {socialLinks.map((s) => {
-              const Icon = SOCIAL_ICON[s.platform];
-              return (
-                <li key={s.id}>
-                  <a
-                    href={s.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={s.label ?? s.platform}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-brand-gray-200 bg-brand-white text-brand-gray-700 transition hover:border-brand-yellow hover:text-brand-gray-900"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+            <MapEmbed
+              url={mapEmbed?.description ?? null}
+              title={mapEmbed?.title ?? null}
+              caption={null}
+              className={address ? "mt-4" : undefined}
+            />
+          </div>
+        )}
       </div>
 
-      <MapEmbed
-        url={mapEmbed?.description ?? null}
-        title={mapEmbed?.title ?? null}
-        caption={address?.description ?? null}
-        className="container-page pb-12"
-      />
-
       <div className="border-t border-brand-gray-200">
-        <div className="container-page flex flex-col items-start justify-between gap-2 py-6 text-xs text-brand-gray-500 sm:flex-row sm:items-center">
+        <div className="container-page flex flex-col items-start justify-between gap-2 py-4 text-xs text-brand-gray-500 sm:flex-row sm:items-center">
           <p>
             © {year} {siteName}. All rights reserved.
           </p>
