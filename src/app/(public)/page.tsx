@@ -30,7 +30,7 @@ export default async function HomePage() {
     getSiteContent("hero"),
     getSiteContent("our_story"),
     getSiteContent("our_vision"),
-    getPublishedCategories(6),
+    getPublishedCategories(),
   ]);
 
   const heroTitle = hero?.title ?? SITE_NAME;
