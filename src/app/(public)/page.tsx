@@ -50,7 +50,7 @@ export default async function HomePage() {
         >
           <source src="/brand/hero-video.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-brand-white/25" aria-hidden />
+        <div className="absolute inset-0 bg-brand-white/50" aria-hidden />
         <div className="container-page relative z-10 py-8 sm:py-12">
           <div className="mx-auto max-w-4xl text-center">
             <Image
