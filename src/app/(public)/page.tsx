@@ -50,7 +50,7 @@ export default async function HomePage() {
         >
           <source src="/brand/hero-video.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-brand-white/75" aria-hidden />
+        <div className="absolute inset-0 bg-brand-white/25" aria-hidden />
         <div className="container-page relative z-10 py-8 sm:py-12">
           <div className="mx-auto max-w-4xl text-center">
             <Image
@@ -61,7 +61,7 @@ export default async function HomePage() {
               priority
               className="mx-auto h-28 w-auto sm:h-36"
             />
-            <h1 className="mt-3 whitespace-nowrap font-display text-[1.05rem] font-semibold leading-[1.1] tracking-tight text-brand-gray-900 sm:text-[1.575rem] md:text-[2.1rem] lg:text-[2.625rem]">
+            <h1 className="mt-3 whitespace-nowrap font-display text-[0.9rem] font-semibold leading-[1.1] tracking-tight text-brand-gray-900 sm:text-[1.25rem] md:text-[1.6rem] lg:text-[2rem]">
               {heroTitle}
             </h1>
             <hr className="mx-auto mt-4 max-w-2xl border-t border-brand-gray-300" />
@@ -120,9 +120,9 @@ export default async function HomePage() {
                   key={c.id}
                   href={`/categories/${c.slug}`}
                   aria-label={c.name}
-                  className="group block overflow-hidden rounded-[1.5rem] bg-brand-gray-100 shadow-soft transition hover:shadow-elevated"
+                  className="group block overflow-hidden rounded-[1.5rem] bg-brand-white shadow-soft transition hover:shadow-elevated"
                 >
-                  <div className="relative aspect-square overflow-hidden">
+                  <div className="relative aspect-square overflow-hidden bg-brand-gray-100">
                     {c.imageUrl ? (
                       <Image
                         src={c.imageUrl}
@@ -136,6 +136,11 @@ export default async function HomePage() {
                         {c.name}
                       </div>
                     )}
+                  </div>
+                  <div className="p-4 text-center">
+                    <h3 className="font-display text-base font-semibold text-brand-gray-900 transition-colors group-hover:text-brand-yellow-600">
+                      {c.name}
+                    </h3>
                   </div>
                 </Link>
               ))}
