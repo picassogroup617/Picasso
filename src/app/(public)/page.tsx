@@ -61,7 +61,7 @@ export default async function HomePage() {
               priority
               className="mx-auto h-28 w-auto sm:h-36"
             />
-            <h1 className="mt-3 whitespace-nowrap font-display text-[0.9rem] font-semibold leading-[1.1] tracking-tight text-brand-gray-900 sm:text-[1.25rem] md:text-[1.6rem] lg:text-[2rem]">
+            <h1 className="mt-3 whitespace-nowrap font-display text-[0.9rem] font-light leading-[1.1] tracking-wide text-brand-gray-900 sm:text-[1.25rem] md:text-[1.6rem] lg:text-[2rem]">
               {heroTitle}
             </h1>
             <hr className="mx-auto mt-4 max-w-2xl border-t border-brand-gray-300" />
@@ -97,7 +97,7 @@ export default async function HomePage() {
               <p className="text-xs font-medium uppercase tracking-wide text-brand-gray-500">
                 Catalog
               </p>
-              <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+              <h2 className="mt-2 font-display text-3xl font-light tracking-wide sm:text-4xl">
                 Explore our categories
               </h2>
             </div>
@@ -138,7 +138,7 @@ export default async function HomePage() {
                     )}
                   </div>
                   <div className="p-4 text-center">
-                    <h3 className="font-display text-base font-semibold text-brand-gray-900 transition-colors group-hover:text-brand-yellow-600">
+                    <h3 className="font-display text-base font-light tracking-wide text-brand-gray-900 transition-colors group-hover:text-brand-yellow-600">
                       {c.name}
                     </h3>
                   </div>
@@ -184,7 +184,7 @@ function StoryBlock({
         </div>
       )}
       <div>
-        <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+        <h2 className="font-display text-3xl font-light tracking-wide sm:text-4xl">
           {content.title}
         </h2>
         <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-brand-gray-700 sm:text-lg">

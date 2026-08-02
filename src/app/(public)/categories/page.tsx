@@ -19,7 +19,7 @@ export default async function CategoriesIndexPage() {
           <p className="text-xs font-medium uppercase tracking-wide text-brand-gray-500">
             Catalog
           </p>
-          <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-5xl">
+          <h1 className="mt-2 font-display text-3xl font-light tracking-wide sm:text-5xl">
             Categories
           </h1>
           <p className="mt-3 max-w-2xl text-base text-brand-gray-500">
@@ -31,7 +31,7 @@ export default async function CategoriesIndexPage() {
       <section className="container-page py-14">
         {categories.length === 0 ? (
           <div className="rounded-xl border border-dashed border-brand-gray-200 bg-brand-white p-10 text-center">
-            <h2 className="font-display text-xl font-medium text-brand-gray-900">
+            <h2 className="font-display text-xl font-light tracking-wide text-brand-gray-900">
               Nothing here yet
             </h2>
             <p className="mt-2 text-sm text-brand-gray-500">

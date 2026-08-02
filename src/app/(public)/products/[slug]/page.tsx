@@ -71,7 +71,7 @@ export default async function ProductDetailPage({
                 {category.name}
               </p>
             )}
-            <h1 className="mt-2 inline-block max-w-full self-start break-words rounded-xl bg-brand-gray-200 px-4 py-2 font-display text-3xl font-semibold tracking-tight text-brand-gray-900 sm:text-4xl">
+            <h1 className="mt-2 inline-block max-w-full self-start break-words rounded-xl bg-brand-gray-200 px-4 py-2 font-display text-3xl font-light tracking-wide text-brand-gray-900 sm:text-4xl">
               {product.name}
             </h1>
 
@@ -111,7 +111,7 @@ function ProductNotFound() {
   return (
     <section className="container-page py-20">
       <div className="mx-auto max-w-lg rounded-xl border border-dashed border-brand-gray-200 bg-brand-white p-10 text-center">
-        <h1 className="font-display text-2xl font-semibold text-brand-gray-900">
+        <h1 className="font-display text-2xl font-light tracking-wide text-brand-gray-900">
           Product not found
         </h1>
         <p className="mt-2 text-sm text-brand-gray-500">

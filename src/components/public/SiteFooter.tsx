@@ -44,8 +44,8 @@ export function SiteFooter({
           <Image
             src="/brand/logo.png"
             alt={siteName}
-            width={400}
-            height={100}
+            width={520}
+            height={130}
             className="h-16 w-auto"
           />
           <p className="mt-2 max-w-xs text-sm leading-relaxed text-brand-gray-500">

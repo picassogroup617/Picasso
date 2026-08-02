@@ -29,8 +29,8 @@ export function SiteHeader({ siteName }: { siteName: string }) {
           <Image
             src="/brand/logo.png"
             alt={siteName}
-            width={320}
-            height={80}
+            width={416}
+            height={104}
             priority
             className="h-20 w-auto"
           />
